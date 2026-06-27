@@ -38,7 +38,7 @@ Aplicação web em C# que permite ao usuário realizar login e gerenciar um CRUD
 
 ### Passos
 1. Clone o repositório
-2. Execute o script `Scripts/CriarBanco.sql` no SQL Server Management Studio
+2. Execute o script `Script_Banco_SQL/CriarBanco.sql` no SQL Server Management Studio
 3. Ajuste a connection string no `appsettings.json`
 4. Rode o projeto no Visual Studio (`F5`)
 5. Acesse com usuário `admin` e a senha `123456`
