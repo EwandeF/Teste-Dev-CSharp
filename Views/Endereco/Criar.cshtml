@@ -1,0 +1,71 @@
+﻿@{
+    ViewData["Title"] = "Novo Endereço";
+}
+
+<h5 class="mb-4">Novo Endereço</h5>
+
+<form method="post">
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label">CEP</label>
+            <div class="input-group">
+                <input type="text" id="cepVisual" name="Cep" class="form-control" maxlength="8" placeholder="Somente números" />
+                <button type="button" class="btn btn-outline-secondary" onclick="buscarCep()">Buscar CEP</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Logradouro</label>
+            <input type="text" id="logradouro" name="Logradouro" class="form-control" required />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Número</label>
+            <input type="text" name="Numero" class="form-control" required />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Complemento</label>
+            <input type="text" name="Complemento" class="form-control" />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Bairro</label>
+            <input type="text" id="bairro" name="Bairro" class="form-control" required />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Cidade</label>
+            <input type="text" id="cidade" name="Cidade" class="form-control" required />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">UF</label>
+            <input type="text" id="uf" name="Uf" class="form-control" maxlength="2" required />
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="/Endereco" class="btn btn-secondary ms-2">Cancelar</a>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        async function buscarCep() {
+            const cep = document.getElementById('cepVisual').value.replace(/\D/g, '');
+            if (cep.length !== 8) { alert('CEP deve ter 8 dígitos.'); return; }
+
+            const res = await fetch(`/Endereco/BuscarCep?cep=${cep}`);
+            const data = await res.json();
+
+            if (data.erro) { alert('CEP não encontrado.'); return; }
+
+            document.getElementById('logradouro').value = data.logradouro || '';
+            document.getElementById('bairro').value = data.bairro || '';
+            document.getElementById('cidade').value = data.localidade || '';
+            document.getElementById('uf').value = data.uf || '';
+        }
+    </script>
+}

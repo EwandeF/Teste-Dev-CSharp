@@ -8,7 +8,7 @@ namespace TesteDevCSharp.Models
 
         [Required]
         [StringLength(8)]
-        public string CEP { get; set; } = string.Empty;
+        public string Cep { get; set; } = string.Empty;
 
         [Required]
         public string Logradouro { get; set; } = string.Empty;
@@ -23,7 +23,7 @@ namespace TesteDevCSharp.Models
 
         [Required]
         [StringLength(2)]
-        public string UF { get; set; } = string.Empty;
+        public string Uf { get; set; } = string.Empty;
 
         [Required]
         public string Numero { get; set; } = string.Empty;
