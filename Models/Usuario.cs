@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TesteDevCSharp.Models
 {
@@ -12,7 +13,9 @@ namespace TesteDevCSharp.Models
 
         [Required(ErrorMessage = "Informe o usuário.")]
         [StringLength(50)]
-        public string UsuarioLogin { get; set; } = string.Empty;
+
+        [Column("Usuario")]
+        public string Login { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Informe a senha.")]
         [StringLength(100)]
