@@ -1,4 +1,4 @@
-﻿@model TesteDevCSharp.ViewModels.EnderecoViewModel
+@model TesteDevCSharp.ViewModels.EnderecoViewModel
 @{
     ViewData["Title"] = "Editar Endereço";
 }
@@ -23,6 +23,7 @@
                        maxlength="9" placeholder="Ex: 01310-100 ou 01310100" />
                 <button type="button" class="btn btn-outline-secondary" onclick="buscarCep()">Buscar</button>
             </div>
+            @Html.ValidationMessageFor(m => m.Cep, "", new { @class = "text-danger" })
         </div>
     </div>
 
@@ -30,10 +31,12 @@
         <div class="col-md-6">
             <label class="form-label">Logradouro</label>
             <input type="text" id="logradouro" name="Logradouro" class="form-control" value="@Model.Logradouro" required />
+            @Html.ValidationMessageFor(m => m.Logradouro, "", new { @class = "text-danger" })
         </div>
         <div class="col-md-2">
             <label class="form-label">Número</label>
             <input type="text" name="Numero" class="form-control" value="@Model.Numero" required />
+            @Html.ValidationMessageFor(m => m.Numero, "", new { @class = "text-danger" })
         </div>
         <div class="col-md-4">
             <label class="form-label">Complemento</label>
@@ -45,20 +48,23 @@
         <div class="col-md-4">
             <label class="form-label">Bairro</label>
             <input type="text" id="bairro" name="Bairro" class="form-control" value="@Model.Bairro" required />
+            @Html.ValidationMessageFor(m => m.Bairro, "", new { @class = "text-danger" })
         </div>
         <div class="col-md-4">
             <label class="form-label">Cidade</label>
             <input type="text" id="cidade" name="Cidade" class="form-control" value="@Model.Cidade" required />
+            @Html.ValidationMessageFor(m => m.Cidade, "", new { @class = "text-danger" })
         </div>
         <div class="col-md-2">
             <label class="form-label">UF</label>
             <input type="text" id="uf" name="Uf" class="form-control" value="@Model.Uf" maxlength="2" required />
+            @Html.ValidationMessageFor(m => m.Uf, "", new { @class = "text-danger" })
         </div>
     </div>
 
     <div class="mt-3">
         <button type="submit" class="btn btn-primary">Salvar</button>
-        <a href="/Endereco" class="btn btn-secondary ms-2">Cancelar</a>
+        <a href="/Endereco/Index" class="btn btn-secondary ms-2">Cancelar</a>
     </div>
 </form>
 
