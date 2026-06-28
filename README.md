@@ -52,7 +52,8 @@ O projeto segue separação de responsabilidades com camada de serviços:
 TesteDevCSharp/
 ├── Controllers/
 │   ├── AccountController.cs      ← autenticação e logout
-│   └── EnderecoController.cs     ← orquestra as requisições
+│   ├── EnderecoController.cs     ← orquestra as requisições
+│   └── HomeController.cs         ← página de erro
 ├── Services/
 │   ├── IAccountService.cs / AccountService.cs       ← autenticação com BCrypt
 │   ├── IEnderecoService.cs / EnderecoService.cs     ← CRUD de endereços
@@ -88,12 +89,12 @@ TesteDevCSharp/
 | BCrypt | Senhas nunca armazenadas em texto puro |
 | AntiForgeryToken | Proteção CSRF em todos os POSTs |
 | Async/Await | Operações com banco de dados assíncronas |
-| Try/Catch + ILogger | Tratamento e log de erros nos endpoints |
+| Try/Catch + ILogger | Tratamento e log de erros em todos os controllers e services |
 | Injeção de Dependência | Serviços registrados e injetados via DI |
 | Separação de Responsabilidades | Controllers finos, lógica nos Services |
 | ViewModel | Validação segura no servidor sem expor o Model |
 | SessionHelper | Gerenciamento centralizado de sessão |
-| Seed Automático | Usuário admin criado na primeira execução |
+| Seed Automático | Usuário admin criado na primeira execução com senha criptografada |
 | Padronização de Dados | Capitalização e formatação automática ao salvar |
 | Testes Unitários | 12 testes cobrindo os serviços principais |
 
@@ -116,36 +117,47 @@ TesteDevCSharp/
 ## 🚀 Como Executar
 
 ### Pré-requisitos
-- Visual Studio 2022
+- Visual Studio 2022 ou superior (testado no Visual Studio 2026)
 - SQL Server
+- SQL Server Management Studio (SSMS)
 - .NET 10 SDK
 
 ### Passos
 
-1. Clone o repositório
+**1. Clone o repositório**
 ```bash
 git clone https://github.com/EwandeF/Teste-Dev-CSharp.git
 ```
 
-2. Execute o script de criação do banco no **SQL Server Management Studio**
+**2. Crie o banco de dados no SQL Server Management Studio**
+
+Abra o SSMS, conecte ao seu servidor e execute:
+```sql
+CREATE DATABASE TesteDevCSharp;
+```
+
+Em seguida execute o script de criação das tabelas:
 ```
 Script_Banco_SQL/CriarBanco.sql
 ```
 
-3. Ajuste a connection string no `appsettings.json`
+**3. Ajuste a connection string no `appsettings.json`**
 ```json
 "ConnectionStrings": {
-  "DefaultConnection": "Server=SEU_SERVIDOR;Database=TesteDevCSharp;Trusted_Connection=True;"
+  "DefaultConnection": "Server=.\SQLEXPRESS;Database=TesteDevCSharp;Trusted_Connection=True;TrustServerCertificate=True;"
 }
 ```
+> Se seu servidor tiver um nome diferente, substitua `.\SQLEXPRESS` pelo nome correto (ex: `localhost`, `(localdb)\MSSQLLocalDB`)
 
-4. Rode o projeto no Visual Studio (`F5`)
+**4. Rode o projeto no Visual Studio (`F5`)**
 
-5. Acesse com as credenciais padrão:
-   - **Usuário:** `admin`
-   - **Senha:** `123456`
+> Na primeira execução o sistema cria automaticamente o usuário administrador com senha criptografada.
 
-> O usuário administrador é criado automaticamente com senha criptografada na primeira execução.
+**5. Acesse com as credenciais padrão:**
+- **Usuário:** `admin`
+- **Senha:** `123456`
+
+---
 
 ### Rodando os Testes
 
@@ -175,3 +187,6 @@ O repositório segue o padrão de **um commit por funcionalidade**, conforme exi
 - `feat: adicionar testes unitários com xUnit`
 - `feat: padronizar capitalização dos campos de endereço ao salvar`
 - `fix: corrigir cancelar 404 e exibir erros de validação nos formulários`
+- `refactor: corrigir ordem do pipeline, catch genérico, alinhamento de tamanhos e ILogger`
+- `fix: remover botão sair duplicado e manter valores ao falhar validação`
+- `fix: corrigir NullReferenceException no Editar e manter valores na validação`
