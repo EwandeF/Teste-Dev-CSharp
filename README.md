@@ -1,4 +1,4 @@
-﻿# 📍 Gerenciador de Endereços — Teste Prático Desenvolvedor C#
+# 📍 Gerenciador de Endereços — Teste Prático Desenvolvedor C#
 
 Aplicação web desenvolvida em **ASP.NET Core MVC** que permite ao usuário realizar login e gerenciar um CRUD completo de endereços, com integração à API do ViaCEP, exportação para CSV e boas práticas de segurança e arquitetura.
 
@@ -16,6 +16,7 @@ Aplicação web desenvolvida em **ASP.NET Core MVC** que permite ao usuário rea
 ### 📋 CRUD de Endereços
 - Adicionar, visualizar, editar e excluir endereços
 - Campos: CEP, Logradouro, Número, Complemento (opcional), Bairro, Cidade, UF
+- Validação de campos no servidor via `ModelState` com `ViewModel` dedicado
 - Busca automática de endereço pelo CEP via **API ViaCEP**
 - Aceita CEP com ou sem traço (`01310100` ou `01310-100`)
 - CEP exibido sempre no formato `00000-000`
@@ -27,9 +28,17 @@ Aplicação web desenvolvida em **ASP.NET Core MVC** que permite ao usuário rea
 - Campos entre aspas duplas para evitar quebras por vírgula
 
 ### 🗄️ Banco de Dados
-- Tabela `Usuarios`: `Id`, `Nome`, `Usuario`, `Senha`
-- Tabela `Enderecos`: `Id`, `CEP`, `Logradouro`, `Complemento`, `Bairro`, `Cidade`, `UF`, `Numero`, `UsuarioId`
+- Tabela `Usuarios`: Id, Nome, Usuario, Senha
+- Tabela `Enderecos`: Id, CEP, Logradouro, Complemento, Bairro, Cidade, UF, Numero, UsuarioId
 - Script de criação disponível em `Script_Banco_SQL/CriarBanco.sql`
+
+### 🧪 Testes Unitários
+- 12 testes implementados com **xUnit**
+- Banco em memória com **Entity Framework InMemory**
+- Cobertura dos serviços principais:
+  - `AccountServiceTests` — autenticação com BCrypt
+  - `EnderecoServiceTests` — CRUD, isolamento por usuário, limpeza de CEP
+  - `CsvExportServiceTests` — formatação, escape de aspas, BOM UTF-8
 
 ---
 
@@ -50,11 +59,20 @@ TesteDevCSharp/
 ├── Models/
 │   ├── Usuario.cs
 │   └── Endereco.cs
+├── ViewModels/
+│   └── EnderecoViewModel.cs      ← validação de formulários no servidor
+├── Helpers/
+│   └── SessionHelper.cs          ← gerenciamento centralizado de sessão
 ├── Data/
 │   └── AppDbContext.cs
 ├── Views/
 │   ├── Account/Login.cshtml
 │   └── Endereco/Index.cshtml, Criar.cshtml, Editar.cshtml
+├── TesteDevCSharp.Tests/
+│   └── Services/
+│       ├── AccountServiceTests.cs
+│       ├── EnderecoServiceTests.cs
+│       └── CsvExportServiceTests.cs
 └── Script_Banco_SQL/
     └── CriarBanco.sql
 ```
@@ -68,10 +86,13 @@ TesteDevCSharp/
 | BCrypt | Senhas nunca armazenadas em texto puro |
 | AntiForgeryToken | Proteção CSRF em todos os POSTs |
 | Async/Await | Operações com banco de dados assíncronas |
-| Try/Catch | Tratamento de erros nos endpoints |
+| Try/Catch + ILogger | Tratamento e log de erros nos endpoints |
 | Injeção de Dependência | Serviços registrados e injetados via DI |
 | Separação de Responsabilidades | Controllers finos, lógica nos Services |
+| ViewModel | Validação segura no servidor sem expor o Model |
+| SessionHelper | Gerenciamento centralizado de sessão |
 | Seed Automático | Usuário admin criado na primeira execução |
+| Testes Unitários | 12 testes cobrindo os serviços principais |
 
 ---
 
@@ -81,6 +102,8 @@ TesteDevCSharp/
 - **Entity Framework Core**
 - **SQL Server**
 - **BCrypt.Net** — criptografia de senhas
+- **xUnit** — testes unitários
+- **Entity Framework InMemory** — banco em memória para testes
 - **Bootstrap 5** — interface responsiva
 - **HTML, CSS, JavaScript**
 - **API ViaCEP** — consulta de endereços por CEP
@@ -121,6 +144,12 @@ Script_Banco_SQL/CriarBanco.sql
 
 > O usuário administrador é criado automaticamente com senha criptografada na primeira execução.
 
+### Rodando os Testes
+
+```bash
+dotnet test TesteDevCSharp.Tests\TesteDevCSharp.Tests.csproj
+```
+
 ---
 
 ## 📝 Commits por Funcionalidade
@@ -138,3 +167,6 @@ O repositório segue o padrão de **um commit por funcionalidade**, conforme exi
 - `feat: adicionar ValidateAntiForgeryToken e operações assíncronas`
 - `feat: seed automático do usuário admin com senha BCrypt`
 - `feat: formatar CEP no formato 00000-000 na exportação CSV`
+- `refactor: usar SessionHelper, ILogger, ModelState e seed async`
+- `refactor: criar EnderecoViewModel para validação correta no servidor`
+- `feat: adicionar testes unitários com xUnit`
