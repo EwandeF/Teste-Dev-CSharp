@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using TesteDevCSharp.Helpers;
 using TesteDevCSharp.Services;
 
 namespace TesteDevCSharp.Controllers
@@ -6,16 +8,23 @@ namespace TesteDevCSharp.Controllers
     public class AccountController : Controller
     {
         private readonly IAccountService _accountService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(IAccountService accountService)
+        public AccountController(
+            IAccountService accountService,
+            IHttpContextAccessor httpContextAccessor,
+            ILogger<AccountController> logger)
         {
             _accountService = accountService;
+            _httpContextAccessor = httpContextAccessor;
+            _logger = logger;
         }
 
         [HttpGet]
         public IActionResult Login()
         {
-            if (HttpContext.Session.GetString("UsuarioId") != null)
+            if (SessionHelper.GetUsuarioId(_httpContextAccessor) != null)
                 return RedirectToAction("Index", "Endereco");
 
             return View();
@@ -41,13 +50,13 @@ namespace TesteDevCSharp.Controllers
                     return View();
                 }
 
-                HttpContext.Session.SetString("UsuarioId", usuario.Id.ToString());
-                HttpContext.Session.SetString("UsuarioNome", usuario.Nome);
+                SessionHelper.SetUsuario(_httpContextAccessor, usuario.Id, usuario.Nome);
 
                 return RedirectToAction("Index", "Endereco");
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao realizar login para o usuário {Login}", login);
                 ViewBag.Erro = "Erro ao realizar login. Tente novamente.";
                 return View();
             }
@@ -55,7 +64,7 @@ namespace TesteDevCSharp.Controllers
 
         public IActionResult Logout()
         {
-            HttpContext.Session.Clear();
+            SessionHelper.Limpar(_httpContextAccessor);
             return RedirectToAction("Login");
         }
     }

@@ -1,11 +1,17 @@
-﻿@model TesteDevCSharp.Models.Endereco
+﻿@model TesteDevCSharp.ViewModels.EnderecoViewModel
 @{
     ViewData["Title"] = "Editar Endereço";
 }
 
 <h5 class="mb-4">Editar Endereço</h5>
 
+@if (ViewBag.Erro != null)
+{
+    <div class="alert alert-danger">@ViewBag.Erro</div>
+}
+
 <form method="post">
+    @Html.AntiForgeryToken()
     <input type="hidden" name="Id" value="@Model.Id" />
 
     <div class="row mb-3">
@@ -54,14 +60,13 @@
         <button type="submit" class="btn btn-primary">Salvar</button>
         <a href="/Endereco" class="btn btn-secondary ms-2">Cancelar</a>
     </div>
-    @Html.AntiForgeryToken()
 </form>
 
 @section Scripts {
     <script>
         async function buscarCep() {
             const cepBruto = document.getElementById('cepVisual').value;
-            const cep = cepBruto.replace(/\D/g, ''); // remove tudo que não é número
+            const cep = cepBruto.replace(/\D/g, '');
 
             if (cep.length !== 8) { alert('CEP deve ter 8 dígitos.'); return; }
 

@@ -6,7 +6,7 @@
         {
             var id = httpContextAccessor.HttpContext?.Session.GetString("UsuarioId");
             if (id == null) return null;
-            return int.Parse(id);
+            return int.TryParse(id, out var resultado) ? resultado : null;
         }
 
         public static void SetUsuario(IHttpContextAccessor httpContextAccessor, int id, string nome)

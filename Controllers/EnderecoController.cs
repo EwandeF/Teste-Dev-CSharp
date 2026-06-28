@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using TesteDevCSharp.Helpers;
 using TesteDevCSharp.Models;
 using TesteDevCSharp.Services;
+using TesteDevCSharp.ViewModels;
 
 namespace TesteDevCSharp.Controllers
 {
@@ -9,19 +12,24 @@ namespace TesteDevCSharp.Controllers
         private readonly IEnderecoService _enderecoService;
         private readonly IViaCepService _viaCepService;
         private readonly ICsvExportService _csvExportService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ILogger<EnderecoController> _logger;
 
         public EnderecoController(
             IEnderecoService enderecoService,
             IViaCepService viaCepService,
-            ICsvExportService csvExportService)
+            ICsvExportService csvExportService,
+            IHttpContextAccessor httpContextAccessor,
+            ILogger<EnderecoController> logger)
         {
             _enderecoService = enderecoService;
             _viaCepService = viaCepService;
             _csvExportService = csvExportService;
+            _httpContextAccessor = httpContextAccessor;
+            _logger = logger;
         }
 
-        private int? GetUsuarioLogado() =>
-            int.TryParse(HttpContext.Session.GetString("UsuarioId"), out var id) ? id : null;
+        private int? GetUsuarioLogado() => SessionHelper.GetUsuarioId(_httpContextAccessor);
 
         public async Task<IActionResult> Index()
         {
@@ -34,8 +42,9 @@ namespace TesteDevCSharp.Controllers
                 ViewBag.UsuarioNome = HttpContext.Session.GetString("UsuarioNome");
                 return View(enderecos);
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao listar endereços do usuário {UsuarioId}", usuarioId);
                 ViewBag.Erro = "Erro ao carregar endereços.";
                 return View(new List<Endereco>());
             }
@@ -44,26 +53,41 @@ namespace TesteDevCSharp.Controllers
         public IActionResult Criar()
         {
             if (GetUsuarioLogado() == null) return RedirectToAction("Login", "Account");
-            return View();
+            return View(new EnderecoViewModel());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Criar(Endereco endereco)
+        public async Task<IActionResult> Criar(EnderecoViewModel vm)
         {
             var usuarioId = GetUsuarioLogado();
             if (usuarioId == null) return RedirectToAction("Login", "Account");
 
+            if (!ModelState.IsValid)
+                return View(vm);
+
             try
             {
-                endereco.UsuarioId = usuarioId.Value;
+                var endereco = new Endereco
+                {
+                    Cep = vm.Cep,
+                    Logradouro = vm.Logradouro,
+                    Complemento = vm.Complemento,
+                    Bairro = vm.Bairro,
+                    Cidade = vm.Cidade,
+                    Uf = vm.Uf,
+                    Numero = vm.Numero,
+                    UsuarioId = usuarioId.Value
+                };
+
                 await _enderecoService.AdicionarAsync(endereco);
                 return RedirectToAction("Index");
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao adicionar endereço para o usuário {UsuarioId}", usuarioId);
                 ViewBag.Erro = "Erro ao salvar endereço.";
-                return View(endereco);
+                return View(vm);
             }
         }
 
@@ -76,31 +100,61 @@ namespace TesteDevCSharp.Controllers
             {
                 var endereco = await _enderecoService.BuscarPorIdAsync(id, usuarioId.Value);
                 if (endereco == null) return NotFound();
-                return View(endereco);
+
+                var vm = new EnderecoViewModel
+                {
+                    Id = endereco.Id,
+                    Cep = endereco.Cep,
+                    Logradouro = endereco.Logradouro,
+                    Complemento = endereco.Complemento,
+                    Bairro = endereco.Bairro,
+                    Cidade = endereco.Cidade,
+                    Uf = endereco.Uf,
+                    Numero = endereco.Numero
+                };
+
+                return View(vm);
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao buscar endereço {EnderecoId} para edição", id);
                 return RedirectToAction("Index");
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Editar(Endereco endereco)
+        public async Task<IActionResult> Editar(EnderecoViewModel vm)
         {
             var usuarioId = GetUsuarioLogado();
             if (usuarioId == null) return RedirectToAction("Login", "Account");
 
+            if (!ModelState.IsValid)
+                return View(vm);
+
             try
             {
-                endereco.UsuarioId = usuarioId.Value;
+                var endereco = new Endereco
+                {
+                    Id = vm.Id,
+                    Cep = vm.Cep,
+                    Logradouro = vm.Logradouro,
+                    Complemento = vm.Complemento,
+                    Bairro = vm.Bairro,
+                    Cidade = vm.Cidade,
+                    Uf = vm.Uf,
+                    Numero = vm.Numero,
+                    UsuarioId = usuarioId.Value
+                };
+
                 await _enderecoService.AtualizarAsync(endereco);
                 return RedirectToAction("Index");
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao atualizar endereço {EnderecoId}", vm.Id);
                 ViewBag.Erro = "Erro ao atualizar endereço.";
-                return View(endereco);
+                return View(vm);
             }
         }
 
@@ -115,9 +169,9 @@ namespace TesteDevCSharp.Controllers
             {
                 await _enderecoService.ExcluirAsync(id, usuarioId.Value);
             }
-            catch
+            catch (Exception ex)
             {
-                // log futuramente
+                _logger.LogError(ex, "Erro ao excluir endereço {EnderecoId}", id);
             }
 
             return RedirectToAction("Index");
@@ -128,7 +182,6 @@ namespace TesteDevCSharp.Controllers
             if (string.IsNullOrEmpty(cep))
                 return Json(new { erro = "CEP inválido" });
 
-            // Remove traço e outros caracteres não numéricos
             var cepLimpo = new string(cep.Where(char.IsDigit).ToArray());
 
             if (cepLimpo.Length != 8)
@@ -140,8 +193,9 @@ namespace TesteDevCSharp.Controllers
                 if (json == null) return Json(new { erro = "CEP não encontrado" });
                 return Content(json, "application/json");
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao buscar CEP {Cep}", cepLimpo);
                 return Json(new { erro = "Erro ao buscar CEP" });
             }
         }
@@ -157,8 +211,9 @@ namespace TesteDevCSharp.Controllers
                 var bytes = _csvExportService.GerarCsv(enderecos);
                 return File(bytes, "text/csv", "enderecos.csv");
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao exportar CSV para o usuário {UsuarioId}", usuarioId);
                 return RedirectToAction("Index");
             }
         }
