@@ -28,12 +28,14 @@ namespace TesteDevCSharp.Services
 
         public async Task AdicionarAsync(Endereco endereco)
         {
+            endereco.Cep = LimparCep(endereco.Cep);
             _context.Enderecos.Add(endereco);
             await _context.SaveChangesAsync();
         }
 
         public async Task AtualizarAsync(Endereco endereco)
         {
+            endereco.Cep = LimparCep(endereco.Cep);
             _context.Enderecos.Update(endereco);
             await _context.SaveChangesAsync();
         }
@@ -46,6 +48,12 @@ namespace TesteDevCSharp.Services
                 _context.Enderecos.Remove(endereco);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        // Remove tudo que não é número antes de salvar
+        private static string LimparCep(string cep)
+        {
+            return new string(cep.Where(char.IsDigit).ToArray());
         }
     }
 }

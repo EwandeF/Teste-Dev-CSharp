@@ -38,7 +38,7 @@ else
             @foreach (var e in Model)
             {
                 <tr>
-                    <td>@e.Cep</td>
+                    <td>@(e.Cep.Length == 8 ? $"{e.Cep[..5]}-{e.Cep[5..]}" : e.Cep)</td>
                     <td>@e.Logradouro</td>
                     <td>@e.Numero</td>
                     <td>@e.Bairro</td>

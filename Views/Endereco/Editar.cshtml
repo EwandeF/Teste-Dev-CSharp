@@ -12,7 +12,9 @@
         <div class="col-md-4">
             <label class="form-label">CEP</label>
             <div class="input-group">
-                <input type="text" id="cepVisual" name="Cep" class="form-control" value="@Model.Cep" maxlength="9" />
+                <input type="text" id="cepVisual" name="Cep" class="form-control"
+                       value="@(Model.Cep.Length == 8 ? $"{Model.Cep[..5]}-{Model.Cep[5..]}" : Model.Cep)"
+                       maxlength="9" placeholder="Ex: 01310-100 ou 01310100" />
                 <button type="button" class="btn btn-outline-secondary" onclick="buscarCep()">Buscar</button>
             </div>
         </div>
