@@ -17,9 +17,11 @@ Aplicação web desenvolvida em **ASP.NET Core MVC** que permite ao usuário rea
 - Adicionar, visualizar, editar e excluir endereços
 - Campos: CEP, Logradouro, Número, Complemento (opcional), Bairro, Cidade, UF
 - Validação de campos no servidor via `ModelState` com `ViewModel` dedicado
+- Exibição de erros de validação diretamente nos formulários
 - Busca automática de endereço pelo CEP via **API ViaCEP**
 - Aceita CEP com ou sem traço (`01310100` ou `01310-100`)
 - CEP exibido sempre no formato `00000-000`
+- Padronização automática de dados ao salvar (capitalização e UF em maiúsculas)
 
 ### 📤 Exportação CSV
 - Exportação dos endereços do usuário logado
@@ -92,6 +94,7 @@ TesteDevCSharp/
 | ViewModel | Validação segura no servidor sem expor o Model |
 | SessionHelper | Gerenciamento centralizado de sessão |
 | Seed Automático | Usuário admin criado na primeira execução |
+| Padronização de Dados | Capitalização e formatação automática ao salvar |
 | Testes Unitários | 12 testes cobrindo os serviços principais |
 
 ---
@@ -170,3 +173,5 @@ O repositório segue o padrão de **um commit por funcionalidade**, conforme exi
 - `refactor: usar SessionHelper, ILogger, ModelState e seed async`
 - `refactor: criar EnderecoViewModel para validação correta no servidor`
 - `feat: adicionar testes unitários com xUnit`
+- `feat: padronizar capitalização dos campos de endereço ao salvar`
+- `fix: corrigir cancelar 404 e exibir erros de validação nos formulários`
