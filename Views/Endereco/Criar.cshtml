@@ -9,7 +9,7 @@
         <div class="col-md-4">
             <label class="form-label">CEP</label>
             <div class="input-group">
-                <input type="text" id="cepVisual" name="Cep" class="form-control" maxlength="8" placeholder="Somente números" />
+                <input type="text" id="cepVisual" name="Cep" class="form-control" maxlength="9" placeholder="Somente números" />
                 <button type="button" class="btn btn-outline-secondary" onclick="buscarCep()">Buscar CEP</button>
             </div>
         </div>
@@ -55,7 +55,9 @@
 @section Scripts {
     <script>
         async function buscarCep() {
-            const cep = document.getElementById('cepVisual').value.replace(/\D/g, '');
+            const cepBruto = document.getElementById('cepVisual').value;
+            const cep = cepBruto.replace(/\D/g, ''); // remove tudo que não é número
+
             if (cep.length !== 8) { alert('CEP deve ter 8 dígitos.'); return; }
 
             const res = await fetch(`/Endereco/BuscarCep?cep=${cep}`);

@@ -125,12 +125,18 @@ namespace TesteDevCSharp.Controllers
 
         public async Task<IActionResult> BuscarCep(string cep)
         {
-            if (string.IsNullOrEmpty(cep) || cep.Length != 8)
+            if (string.IsNullOrEmpty(cep))
                 return Json(new { erro = "CEP inválido" });
+
+            // Remove traço e outros caracteres não numéricos
+            var cepLimpo = new string(cep.Where(char.IsDigit).ToArray());
+
+            if (cepLimpo.Length != 8)
+                return Json(new { erro = "CEP deve conter 8 dígitos" });
 
             try
             {
-                var json = await _viaCepService.BuscarCepAsync(cep);
+                var json = await _viaCepService.BuscarCepAsync(cepLimpo);
                 if (json == null) return Json(new { erro = "CEP não encontrado" });
                 return Content(json, "application/json");
             }

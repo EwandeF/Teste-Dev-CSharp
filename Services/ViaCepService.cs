@@ -13,7 +13,12 @@
         {
             try
             {
-                var response = await _httpClient.GetAsync($"https://viacep.com.br/ws/{cep}/json/");
+                // Remove qualquer caractere não numérico (traço, ponto, espaço)
+                var cepLimpo = new string(cep.Where(char.IsDigit).ToArray());
+
+                if (cepLimpo.Length != 8) return null;
+
+                var response = await _httpClient.GetAsync($"https://viacep.com.br/ws/{cepLimpo}/json/");
                 if (!response.IsSuccessStatusCode) return null;
                 return await response.Content.ReadAsStringAsync();
             }
