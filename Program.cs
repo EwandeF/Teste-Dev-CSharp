@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using TesteDevCSharp.Data;
+using TesteDevCSharp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Adiciona serviços no container
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -11,6 +11,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddHttpClient();
+
+// Registro dos serviços
+builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IEnderecoService, EnderecoService>();
+builder.Services.AddScoped<ICsvExportService, CsvExportService>();
+builder.Services.AddHttpClient<IViaCepService, ViaCepService>();
 
 builder.Services.AddSession(options =>
 {
@@ -21,7 +27,6 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
-// Configure o pipeline de solicitação HTTP
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -29,13 +34,9 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseRouting();
-
 app.UseAuthorization();
-
 app.UseSession();
-
 app.MapStaticAssets();
 
 app.MapControllerRoute(
