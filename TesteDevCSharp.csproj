@@ -7,10 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Scripts\**" />
-    <Content Remove="Scripts\**" />
-    <EmbeddedResource Remove="Scripts\**" />
-    <None Remove="Scripts\**" />
+    <Compile Remove="TesteDevCSharp.Tests\**" />
+    <Content Remove="TesteDevCSharp.Tests\**" />
+    <EmbeddedResource Remove="TesteDevCSharp.Tests\**" />
+    <None Remove="TesteDevCSharp.Tests\**" />
   </ItemGroup>
 
   <ItemGroup>
