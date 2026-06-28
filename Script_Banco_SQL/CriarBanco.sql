@@ -1,27 +1,27 @@
 ﻿USE TesteDevCSharp;
 GO
-
+ 
 IF OBJECT_ID('dbo.Enderecos', 'U') IS NOT NULL
     DROP TABLE dbo.Enderecos;
 GO
-
+ 
 IF OBJECT_ID('dbo.Usuarios', 'U') IS NOT NULL
     DROP TABLE dbo.Usuarios;
 GO
-
+ 
 CREATE TABLE Usuarios
 (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     Nome VARCHAR(100) NOT NULL,
     Usuario VARCHAR(50) NOT NULL UNIQUE,
-    Senha VARCHAR(255) NOT NULL
+    Senha VARCHAR(255) NOT NULL -- VARCHAR(255) alinhado com [StringLength(255)] do model
 );
 GO
-
+ 
 CREATE TABLE Enderecos
 (
     Id INT IDENTITY(1,1) PRIMARY KEY,
-    CEP VARCHAR(9) NOT NULL,
+    CEP VARCHAR(9) NOT NULL,    -- VARCHAR(9) alinhado com [StringLength(9)] do model
     Logradouro VARCHAR(200) NOT NULL,
     Complemento VARCHAR(200) NULL,
     Bairro VARCHAR(100) NOT NULL,

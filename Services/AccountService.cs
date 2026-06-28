@@ -7,10 +7,12 @@ namespace TesteDevCSharp.Services
     public class AccountService : IAccountService
     {
         private readonly AppDbContext _context;
+        private readonly ILogger<AccountService> _logger;
 
-        public AccountService(AppDbContext context)
+        public AccountService(AppDbContext context, ILogger<AccountService> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<Usuario?> AutenticarAsync(string login, string senha)
@@ -22,12 +24,12 @@ namespace TesteDevCSharp.Services
 
                 if (usuario == null) return null;
 
-                // Verifica a senha com BCrypt
                 var senhaValida = BCrypt.Net.BCrypt.Verify(senha, usuario.Senha);
                 return senhaValida ? usuario : null;
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao autenticar usuário {Login}", login);
                 return null;
             }
         }

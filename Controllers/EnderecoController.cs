@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using TesteDevCSharp.Helpers;
 using TesteDevCSharp.Models;
 using TesteDevCSharp.Services;
@@ -177,25 +176,21 @@ namespace TesteDevCSharp.Controllers
             return RedirectToAction("Index");
         }
 
+        // Limpeza de CEP feita apenas no ViaCepService — sem duplicação
         public async Task<IActionResult> BuscarCep(string cep)
         {
             if (string.IsNullOrEmpty(cep))
                 return Json(new { erro = "CEP inválido" });
 
-            var cepLimpo = new string(cep.Where(char.IsDigit).ToArray());
-
-            if (cepLimpo.Length != 8)
-                return Json(new { erro = "CEP deve conter 8 dígitos" });
-
             try
             {
-                var json = await _viaCepService.BuscarCepAsync(cepLimpo);
+                var json = await _viaCepService.BuscarCepAsync(cep);
                 if (json == null) return Json(new { erro = "CEP não encontrado" });
                 return Content(json, "application/json");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao buscar CEP {Cep}", cepLimpo);
+                _logger.LogError(ex, "Erro ao buscar CEP {Cep}", cep);
                 return Json(new { erro = "Erro ao buscar CEP" });
             }
         }

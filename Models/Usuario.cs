@@ -13,12 +13,11 @@ namespace TesteDevCSharp.Models
 
         [Required(ErrorMessage = "Informe o usuário.")]
         [StringLength(50)]
-
         [Column("Usuario")]
         public string Login { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Informe a senha.")]
-        [StringLength(100)]
+        [StringLength(255)] // alinhado com VARCHAR(255) do SQL
         public string Senha { get; set; } = string.Empty;
     }
 }

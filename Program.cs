@@ -57,8 +57,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseSession();        // Session deve vir antes de UseAuthorization
 app.UseAuthorization();
-app.UseSession();
 app.MapStaticAssets();
 
 app.MapControllerRoute(

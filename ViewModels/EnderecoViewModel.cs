@@ -7,7 +7,7 @@ namespace TesteDevCSharp.ViewModels
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Informe o CEP.")]
-        [StringLength(9)]
+        [StringLength(9)] // alinhado com VARCHAR(9) do SQL
         public string Cep { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Informe o logradouro.")]

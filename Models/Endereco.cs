@@ -7,7 +7,7 @@ namespace TesteDevCSharp.Models
         public int Id { get; set; }
 
         [Required]
-        [StringLength(8)]
+        [StringLength(9)] // alinhado com VARCHAR(9) do SQL (suporta traço)
         public string Cep { get; set; } = string.Empty;
 
         [Required]
