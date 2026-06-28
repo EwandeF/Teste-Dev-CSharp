@@ -27,6 +27,23 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
+// Seed: cria o usuário admin na primeira execução
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    if (!context.Usuarios.Any(u => u.Login == "admin"))
+    {
+        context.Usuarios.Add(new TesteDevCSharp.Models.Usuario
+        {
+            Nome = "Administrador",
+            Login = "admin",
+            Senha = BCrypt.Net.BCrypt.HashPassword("123456")
+        });
+        context.SaveChanges();
+    }
+}
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
