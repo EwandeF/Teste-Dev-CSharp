@@ -28,14 +28,14 @@ namespace TesteDevCSharp.Services
 
         public async Task AdicionarAsync(Endereco endereco)
         {
-            endereco.Cep = LimparCep(endereco.Cep);
+            PadronizarEndereco(endereco);
             _context.Enderecos.Add(endereco);
             await _context.SaveChangesAsync();
         }
 
         public async Task AtualizarAsync(Endereco endereco)
         {
-            endereco.Cep = LimparCep(endereco.Cep);
+            PadronizarEndereco(endereco);
             _context.Enderecos.Update(endereco);
             await _context.SaveChangesAsync();
         }
@@ -50,10 +50,30 @@ namespace TesteDevCSharp.Services
             }
         }
 
+        private static void PadronizarEndereco(Endereco endereco)
+        {
+            endereco.Cep = LimparCep(endereco.Cep);
+            endereco.Logradouro = CapitalizarTexto(endereco.Logradouro);
+            endereco.Bairro = CapitalizarTexto(endereco.Bairro);
+            endereco.Cidade = CapitalizarTexto(endereco.Cidade);
+            endereco.Uf = (endereco.Uf ?? string.Empty).ToUpper().Trim();
+            endereco.Complemento = string.IsNullOrWhiteSpace(endereco.Complemento)
+                ? null
+                : CapitalizarTexto(endereco.Complemento);
+        }
+
         // Remove tudo que não é número antes de salvar
         private static string LimparCep(string cep)
         {
             return new string(cep.Where(char.IsDigit).ToArray());
         }
+
+        private static string CapitalizarTexto(string? texto)
+        {
+            if (string.IsNullOrWhiteSpace(texto)) return string.Empty;
+            return System.Globalization.CultureInfo.CurrentCulture.TextInfo
+                .ToTitleCase(texto.Trim().ToLower());
+        }
     }
 }
+
