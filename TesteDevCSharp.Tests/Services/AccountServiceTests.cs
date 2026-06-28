@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
 using TesteDevCSharp.Data;
 using TesteDevCSharp.Models;
 using TesteDevCSharp.Services;
@@ -16,11 +18,14 @@ namespace TesteDevCSharp.Tests.Services
             return new AppDbContext(options);
         }
 
+        private static ILogger<AccountService> CriarLogger() =>
+            new Mock<ILogger<AccountService>>().Object;
+
         [Fact]
         public async Task AutenticarAsync_ComCredenciaisValidas_DeveRetornarUsuario()
         {
             var context = CriarContexto();
-            var service = new AccountService(context);
+            var service = new AccountService(context, CriarLogger());
 
             context.Usuarios.Add(new Usuario
             {
@@ -40,7 +45,7 @@ namespace TesteDevCSharp.Tests.Services
         public async Task AutenticarAsync_ComSenhaErrada_DeveRetornarNull()
         {
             var context = CriarContexto();
-            var service = new AccountService(context);
+            var service = new AccountService(context, CriarLogger());
 
             context.Usuarios.Add(new Usuario
             {
@@ -59,11 +64,34 @@ namespace TesteDevCSharp.Tests.Services
         public async Task AutenticarAsync_ComUsuarioInexistente_DeveRetornarNull()
         {
             var context = CriarContexto();
-            var service = new AccountService(context);
+            var service = new AccountService(context, CriarLogger());
 
             var resultado = await service.AutenticarAsync("naoexiste", "123456");
 
             Assert.Null(resultado);
+        }
+
+        [Fact]
+        public async Task AutenticarAsync_ComErroBancoDados_DeveLogarErroERetornarNull()
+        {
+            // Contexto descartado simula falha no banco
+            var context = CriarContexto();
+            var loggerMock = new Mock<ILogger<AccountService>>();
+            var service = new AccountService(context, loggerMock.Object);
+
+            context.Dispose();
+
+            var resultado = await service.AutenticarAsync("admin", "123456");
+
+            Assert.Null(resultado);
+            loggerMock.Verify(
+                x => x.Log(
+                    LogLevel.Error,
+                    It.IsAny<EventId>(),
+                    It.IsAny<It.IsAnyType>(),
+                    It.IsAny<Exception>(),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+                Times.Once);
         }
     }
 }
