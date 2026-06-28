@@ -1,18 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TesteDevCSharp.Data;
+using TesteDevCSharp.Services;
 
 namespace TesteDevCSharp.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly IAccountService _accountService;
 
-        public AccountController(AppDbContext context)
+        public AccountController(IAccountService accountService)
         {
-            _context = context;
+            _accountService = accountService;
         }
 
-        // GET: /Account/Login
         [HttpGet]
         public IActionResult Login()
         {
@@ -22,9 +21,9 @@ namespace TesteDevCSharp.Controllers
             return View();
         }
 
-        // POST: /Account/Login
         [HttpPost]
-        public IActionResult Login(string login, string senha)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(string login, string senha)
         {
             if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(senha))
             {
@@ -32,22 +31,28 @@ namespace TesteDevCSharp.Controllers
                 return View();
             }
 
-            var usuario = _context.Usuarios
-                .FirstOrDefault(u => u.Login == login && u.Senha == senha);
-
-            if (usuario == null)
+            try
             {
-                ViewBag.Erro = "Usuário ou senha inválidos.";
+                var usuario = await _accountService.AutenticarAsync(login, senha);
+
+                if (usuario == null)
+                {
+                    ViewBag.Erro = "Usuário ou senha inválidos.";
+                    return View();
+                }
+
+                HttpContext.Session.SetString("UsuarioId", usuario.Id.ToString());
+                HttpContext.Session.SetString("UsuarioNome", usuario.Nome);
+
+                return RedirectToAction("Index", "Endereco");
+            }
+            catch
+            {
+                ViewBag.Erro = "Erro ao realizar login. Tente novamente.";
                 return View();
             }
-
-            HttpContext.Session.SetString("UsuarioId", usuario.Id.ToString());
-            HttpContext.Session.SetString("UsuarioNome", usuario.Nome);
-
-            return RedirectToAction("Index", "Endereco");
         }
 
-        // GET: /Account/Logout
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
