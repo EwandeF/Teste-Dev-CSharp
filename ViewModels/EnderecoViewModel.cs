@@ -7,7 +7,8 @@ namespace TesteDevCSharp.ViewModels
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Informe o CEP.")]
-        [StringLength(9)] // alinhado com VARCHAR(9) do SQL
+        [StringLength(9)]
+        [RegularExpression(@"^\d{5}-?\d{3}$", ErrorMessage = "CEP inválido. Use o formato 00000-000 ou 00000000.")]
         public string Cep { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Informe o logradouro.")]
@@ -31,6 +32,7 @@ namespace TesteDevCSharp.ViewModels
 
         [Required(ErrorMessage = "Informe o número.")]
         [StringLength(20)]
+        [RegularExpression(@"^\d+$", ErrorMessage = "Número deve conter apenas dígitos.")]
         public string Numero { get; set; } = string.Empty;
     }
 }

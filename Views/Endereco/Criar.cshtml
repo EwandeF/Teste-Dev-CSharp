@@ -18,7 +18,8 @@
             <label class="form-label">CEP</label>
             <div class="input-group">
                 <input type="text" id="cepVisual" name="Cep" class="form-control"
-                       value="@Model.Cep" maxlength="9" placeholder="Ex: 01310-100 ou 01310100" />
+                       value="@Model.Cep" maxlength="9" placeholder="Ex: 01310-100 ou 01310100"
+                       oninput="this.value = this.value.replace(/[^\d-]/g, '')" />
                 <button type="button" class="btn btn-outline-secondary" onclick="buscarCep()">Buscar CEP</button>
             </div>
             @Html.ValidationMessageFor(m => m.Cep, "", new { @class = "text-danger" })
@@ -35,7 +36,8 @@
         <div class="col-md-2">
             <label class="form-label">Número</label>
             <input type="text" name="Numero" class="form-control"
-                   value="@Model.Numero" />
+                   value="@Model.Numero"
+                   oninput="this.value = this.value.replace(/\D/g, '')" />
             @Html.ValidationMessageFor(m => m.Numero, "", new { @class = "text-danger" })
         </div>
         <div class="col-md-4">
@@ -74,21 +76,100 @@
 
 @section Scripts {
     <script>
+
+        const txtCep = document.getElementById("cepVisual");
+        const txtLogradouro = document.getElementById("logradouro");
+        const txtBairro = document.getElementById("bairro");
+        const txtCidade = document.getElementById("cidade");
+        const txtUf = document.getElementById("uf");
+        const txtNumero = document.querySelector('input[name="Numero"]');
+
+        const btnBuscar = document.querySelector(".input-group button");
+
         async function buscarCep() {
-            const cepBruto = document.getElementById('cepVisual').value;
-            const cep = cepBruto.replace(/\D/g, '');
 
-            if (cep.length !== 8) { alert('CEP deve ter 8 dígitos.'); return; }
+            const cep = txtCep.value.replace(/\D/g, '');
 
-            const res = await fetch(`/Endereco/BuscarCep?cep=${cep}`);
-            const data = await res.json();
+            if (cep.length !== 8) {
+                alert("Informe um CEP válido com 8 dígitos.");
+                txtCep.focus();
+                return;
+            }
 
-            if (data.erro) { alert('CEP não encontrado.'); return; }
+            btnBuscar.disabled = true;
+            btnBuscar.innerHTML = "Buscando...";
 
-            document.getElementById('logradouro').value = data.logradouro || '';
-            document.getElementById('bairro').value = data.bairro || '';
-            document.getElementById('cidade').value = data.localidade || '';
-            document.getElementById('uf').value = data.uf || '';
+            try {
+
+                const resposta = await fetch(`/Endereco/BuscarCep?cep=${cep}`);
+
+                if (!resposta.ok) {
+                    throw new Error();
+                }
+
+                const data = await resposta.json();
+
+                if (data.erro) {
+                    alert("CEP não encontrado.");
+                    txtCep.focus();
+                    txtCep.select();
+                    return;
+                }
+
+                txtLogradouro.value = data.logradouro ?? "";
+                txtBairro.value = data.bairro ?? "";
+                txtCidade.value = data.localidade ?? "";
+                txtUf.value = data.uf ?? "";
+
+                // Vai automaticamente para o Número
+                txtNumero.focus();
+
+            }
+            catch {
+
+                alert("Erro ao consultar o ViaCEP.");
+
+                txtCep.focus();
+
+            }
+            finally {
+
+                btnBuscar.disabled = false;
+                btnBuscar.innerHTML = "Buscar CEP";
+
+            }
+
         }
+
+        // Clique no botão
+        btnBuscar.addEventListener("click", buscarCep);
+
+        // Enter no CEP
+        txtCep.addEventListener("keydown", function (e) {
+
+            if (e.key === "Enter") {
+
+                e.preventDefault();
+
+                buscarCep();
+
+            }
+
+        });
+
+        // Busca automaticamente ao sair do campo CEP
+        txtCep.addEventListener("blur", function () {
+
+            const cep = txtCep.value.replace(/\D/g, '');
+
+            if (cep.length === 8 &&
+                txtLogradouro.value.trim() === "") {
+
+                buscarCep();
+
+            }
+
+        });
+
     </script>
 }
